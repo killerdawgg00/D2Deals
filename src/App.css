@@ -1,0 +1,1373 @@
+/* --------------------------------------------------
+   FONTS
+   -------------------------------------------------- */
+/* 
+  FONT SETUP INSTRUCTIONS:
+  
+  Option 1: Adobe Fonts (Recommended)
+  ------------------------------------
+  1. Go to fonts.adobe.com and create a project
+  2. Add "Neue Haas Grotesk Display" and "Söhne" fonts
+  3. Get your project ID and add this to index.html:
+     <link rel="stylesheet" href="https://use.typekit.net/YOUR_PROJECT_ID.css">
+  4. The fonts will automatically be available with the names below
+  
+  Option 2: Self-Hosted Fonts
+  ----------------------------
+  1. Place font files in /public/fonts/ directory
+  2. Uncomment and update the @font-face rules below
+  3. Update the src URLs to point to your font files
+*/
+
+/* Self-hosted font declarations (uncomment if using self-hosted fonts) */
+/*
+@font-face {
+  font-family: 'Neue Haas Grotesk Display';
+  src: url('/fonts/neue-haas-grotesk-display-regular.woff2') format('woff2'),
+       url('/fonts/neue-haas-grotesk-display-regular.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Neue Haas Grotesk Display';
+  src: url('/fonts/neue-haas-grotesk-display-bold.woff2') format('woff2'),
+       url('/fonts/neue-haas-grotesk-display-bold.woff') format('woff');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Söhne';
+  src: url('/fonts/soehne-regular.woff2') format('woff2'),
+       url('/fonts/soehne-regular.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Söhne';
+  src: url('/fonts/soehne-bold.woff2') format('woff2'),
+       url('/fonts/soehne-bold.woff') format('woff');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+*/
+
+/* --------------------------------------------------
+   GLOBAL APP WRAPPER
+   -------------------------------------------------- */
+.App {
+  min-height: 100vh;
+  background: #000000;
+  color: #ffffff;
+  font-family: 'Söhne', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+/* Base body text uses Söhne */
+body {
+  font-family: 'Söhne', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+/* All headings use Neue Haas Grotesk Display */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Neue Haas Grotesk Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-weight: 700;
+}
+
+/* --------------------------------------------------
+   LOADER
+   Full-screen race-start style intro with logo
+   -------------------------------------------------- */
+.loader {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  /* White background with spotlight effect - bright center, subtle dark edges */
+  background: radial-gradient(
+    circle at center,
+    #ffffff 0%,
+    #f5f5f5 40%,
+    #e8e8e8 70%,
+    #d0d0d0 100%
+  );
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  opacity: 1; /* Initial opacity for fade-out animation */
+}
+
+.loader-track {
+  position: relative;
+  width: min(420px, 80vw);
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loader-logo {
+  max-width: 100%;
+  height: auto;
+  /* Shadow adjusted for white background - subtle but visible */
+  filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.25)) drop-shadow(0 2px 8px rgba(0, 0, 0, 0.15));
+}
+
+/* --------------------------------------------------
+   HERO SECTION (top of the page)
+   Full-viewport with cross-fade slideshow and parallax
+   
+   ✏️ Configuration:
+   - Full viewport coverage (100vh)
+   - Cross-fade transitions between images
+   - Parallax scroll effect for depth
+   - All images configured in HERO_IMAGES array in Home.jsx
+   -------------------------------------------------- */
+.hero {
+  min-height: 100vh;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  padding: 6rem 8vw;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Slideshow container - full viewport coverage */
+.hero-slideshow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  min-height: 100vh;
+  z-index: 0;
+  overflow: hidden;
+}
+
+/* Ensure image layers stay behind text */
+.hero-slide--layer {
+  z-index: 0;
+}
+
+/* Individual slide - full viewport with cross-fade transition */
+.hero-slide {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  min-height: 100vh;
+  background-size: cover; /* ✏️ Change to 'contain' if you want full image visible */
+  background-position: center;
+  background-repeat: no-repeat;
+  will-change: transform, opacity; /* Performance optimization */
+  transform: translateY(0); /* Initial position for parallax */
+}
+
+/* Hero slide layer - GPU-accelerated transitions (shed.design style) */
+.hero-slide--layer {
+  /* Force GPU acceleration */
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+  /* Ensure smooth rendering */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  /* Optimize for transitions */
+  will-change: transform, opacity;
+  /* Prevent layout shifts */
+  contain: layout style paint;
+}
+
+.hero-inner {
+  max-width: 960px;
+  position: relative;
+  z-index: 10; /* Ensure text is above image layers */
+  color: #ffffff; /* Ensure text is white and visible */
+  pointer-events: none; /* Allow clicks to pass through to images if needed */
+}
+
+.hero-inner * {
+  pointer-events: auto; /* Re-enable pointer events on text elements */
+}
+
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000;
+    padding: 1.5rem 8vw;
+    pointer-events: none;
+    transition: transform 0.35s ease, opacity 0.35s ease, background 0.3s ease, backdrop-filter 0.3s ease;
+  }
+
+  .navbar--with-background {
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  }
+  
+  .navbar--hidden {
+    transform: translateY(-100%);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+.navbar-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  pointer-events: auto; /* Re-enable clicks on navbar itself */
+}
+
+.nav-logo {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  color: inherit;
+}
+
+.nav-logo img {
+  height: 80px;
+  display: block;
+  transition: transform 0.2s ease;
+}
+
+.nav-logo img:hover {
+  transform: scale(1.05);
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.nav-link {
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  font-size: 0.9rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  opacity: 0.85;
+  cursor: pointer;
+  padding: 0.5rem 0;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  position: relative;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.nav-link:hover {
+  opacity: 1;
+  transform: translateY(-1px);
+}
+
+.nav-link.active {
+  opacity: 1;
+}
+
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background: #ffffff;
+  transition: width 0.3s ease;
+}
+
+.nav-link:hover::after,
+.nav-link.active::after {
+  width: 100%;
+}
+
+/* Hamburger menu button (hidden on desktop) */
+.nav-menu-toggle {
+  display: none;
+  flex-direction: column;
+  justify-content: space-around;
+  width: 28px;
+  height: 28px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  z-index: 10;
+}
+
+.nav-menu-toggle span {
+  width: 100%;
+  height: 2px;
+  background: #ffffff;
+  border-radius: 2px;
+  transition: all 0.3s ease;
+  transform-origin: center;
+}
+
+.nav-menu-toggle span:nth-child(1) {
+  transform: translateY(0);
+}
+
+.nav-menu-toggle span:nth-child(2) {
+  opacity: 1;
+}
+
+.nav-menu-toggle span:nth-child(3) {
+  transform: translateY(0);
+}
+
+.nav-menu-toggle span.open:nth-child(1) {
+  transform: translateY(9px) rotate(45deg);
+}
+
+.nav-menu-toggle span.open:nth-child(2) {
+  opacity: 0;
+}
+
+.nav-menu-toggle span.open:nth-child(3) {
+  transform: translateY(-9px) rotate(-45deg);
+}
+
+/* Backdrop overlay for mobile menu */
+.nav-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 998;
+  backdrop-filter: blur(4px);
+}
+
+.hero-kicker {
+  display: inline-block;
+  font-size: 0.9rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  opacity: 0.6 !important; /* Ensure text is visible by default */
+  margin-bottom: 1.5rem;
+  color: #ffffff !important; /* Ensure text is white and visible */
+  font-family: 'Neue Haas Grotesk Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+.hero-title {
+  font-size: clamp(3rem, 7vw, 4.8rem);
+  line-height: 1.05;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  color: #ffffff !important; /* Ensure text is white and visible */
+  opacity: 1 !important; /* Ensure text is visible by default */
+  font-family: 'Neue Haas Grotesk Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+.hero-subtitle {
+  max-width: 640px;
+  font-size: clamp(1.1rem, 2.2vw, 1.4rem);
+  line-height: 1.7;
+  opacity: 0.78 !important; /* Ensure text is visible by default */
+  color: #ffffff !important; /* Ensure text is white and visible */
+  font-family: 'Söhne', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+/* --------------------------------------------------
+   SHED-STYLE SCROLL SECTIONS
+   Each section is full viewport height, with text on the
+   left and a large image/gradient panel on the right.
+
+   ✏️ You can tweak spacing, fonts and layout here.
+   ✏️ Background colours for each section are configured
+      inside `SCROLL_SECTIONS` in `Home.jsx`.
+   -------------------------------------------------- */
+.page-wrapper {
+  background: #050505;
+}
+
+.scroll-section {
+  transition: background-image 0.8s ease-in-out;
+}
+
+.scroll-section-inner {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.1fr);
+  gap: 4rem;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.section-text {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.section-label {
+  font-size: 0.85rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  opacity: 0.6;
+  margin-bottom: 1rem;
+  font-family: 'Neue Haas Grotesk Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+.section-heading {
+  font-size: clamp(2rem, 3.4vw, 3rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin-bottom: 1.5rem;
+  font-family: 'Neue Haas Grotesk Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+.section-body {
+  font-size: 1.05rem;
+  line-height: 1.8;
+  opacity: 0.78;
+  max-width: 34rem;
+  font-family: 'Söhne', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+.section-image {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.section-image-inner {
+  width: 100%;
+  max-width: 520px;
+  aspect-ratio: 4 / 3;
+  border-radius: 24px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 32px 80px rgba(0, 0, 0, 0.7);
+  background:
+  linear-gradient(120deg, rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.35)),
+    url("/bmw-m500i-rear.jpg");
+  background-size: cover;
+  background-position: center;
+}
+
+/* Final CTA section – slightly different layout */
+.scroll-section--final {
+  background: url("/luxury-mercedes-interior.jpg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  position: relative;
+}
+
+/* Add dark overlay for better text readability */
+.scroll-section--final::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.5));
+  z-index: 0;
+}
+
+.scroll-section--final .scroll-section-inner {
+  position: relative;
+  z-index: 1;
+}
+
+.scroll-section-inner--final {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.primary-button {
+  margin-top: 2.5rem;
+  padding: 1.1rem 3rem;
+  border-radius: 14px;                  /* less rounded, more sporty */
+  border: none;
+  background: linear-gradient(135deg, #ffffff, #e5e5e5); /* metallic gloss */
+  color: #000;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;                /* engineered precision look */
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.25s cubic-bezier(0.3, 0.7, 0.4, 1);
+  font-family: 'Söhne', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+  box-shadow: 
+    inset 0 0 0 1px rgba(0, 0, 0, 0.15),  /* subtle bevel */
+    0 6px 14px rgba(0, 0, 0, 0.25);       /* deep sporty shadow */
+}
+
+.primary-button:hover {
+  transform: translateY(-3px) scale(1.03); /* sporty lift */
+  background: linear-gradient(135deg, #ffffff, #f3f3f3);
+  box-shadow:
+    inset 0 0 0 1px rgba(0, 0, 0, 0.2),
+    0 10px 20px rgba(0, 0, 0, 0.35);
+}
+
+.primary-button:active {
+  transform: translateY(1px) scale(0.98);
+  box-shadow:
+    inset 0 0 0 1px rgba(0, 0, 0, 0.25),
+    0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+
+/* --------------------------------------------------
+   ABOUT / CONTACT (kept simple)
+   -------------------------------------------------- */
+.about {
+  min-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 4rem 2rem;
+  background: #050505;
+}
+
+.about h2 {
+  font-size: 2.4rem;
+  margin-bottom: 1.5rem;
+  font-family: 'Neue Haas Grotesk Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+.about-content {
+  max-width: 1200px;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 3rem;
+  align-items: start;
+  font-size: 1.2rem;
+  opacity: 0.8;
+}
+
+.about-video-placeholder {
+  width: 300px;
+  aspect-ratio: 9 / 16;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.9rem;
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.about-video-placeholder:hover {
+  transform: scale(1.02);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.about-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 12px;
+}
+
+.about-video-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 12px;
+  opacity: 1;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.about-video-placeholder:hover .about-video-overlay {
+  opacity: 1;
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.about-play-icon {
+  width: 64px;
+  height: 64px;
+  transition: transform 0.3s ease;
+}
+
+.about-video-placeholder:hover .about-play-icon {
+  transform: scale(1.1);
+}
+
+.about-video-placeholder p {
+  margin: 0;
+  text-align: center;
+  padding: 1rem;
+}
+
+/* Expanded video modal */
+.about-video-expanded-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.95);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  backdrop-filter: blur(10px);
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.about-video-expanded-container {
+  position: relative;
+  width: 100%;
+  max-width: 900px;
+  max-height: 90vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: scaleIn 0.3s ease;
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.about-video-expanded {
+  width: 100%;
+  height: auto;
+  max-height: 90vh;
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+}
+
+.about-video-close {
+  position: absolute;
+  top: -50px;
+  right: 0;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #ffffff;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.about-video-close:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.1);
+}
+
+.about-text {
+  text-align: left;
+}
+
+.financing {
+  min-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 4rem 2rem;
+  background: #050505;
+}
+
+.financing-content {
+  max-width: 800px;
+  text-align: center;
+  background-image: url('/d2.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  position: relative;
+  padding: 4rem 2rem;
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.financing-content::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.5));
+  z-index: 0;
+}
+
+.financing-content h2,
+.financing-content p {
+  position: relative;
+  z-index: 1;
+}
+
+.financing h2 {
+  font-size: 2.4rem;
+  margin-bottom: 1.5rem;
+  font-family: 'Neue Haas Grotesk Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+.financing p {
+  font-size: 1.2rem;
+  opacity: 0.8;
+}
+
+.footer {
+  background: #656363;
+  padding: 3rem 8vw;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.footer-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 2rem;
+}
+
+.footer-logo img {
+  height: 60px;
+  width: auto;
+}
+
+.footer-developer {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.developer-image {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.developer-text {
+  margin: 0;
+  font-size: 0.9rem;
+  opacity: 0.7;
+  color: #ffffff;
+}
+
+/* --------------------------------------------------
+   VEHICLES PAGE
+   -------------------------------------------------- */
+.vehicles-page {
+  min-height: 100vh;
+  background: #050505;
+  color: #ffffff;
+  padding-top: 6rem; /* Space for fixed navbar */
+}
+
+.vehicles-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 4rem 8vw;
+}
+
+.vehicles-header {
+  text-align: center;
+  margin-bottom: 5rem;
+}
+
+.vehicles-kicker {
+  display: inline-block;
+  font-size: 0.9rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  opacity: 0.6;
+  margin-bottom: 1.5rem;
+}
+
+.vehicles-title {
+  font-size: clamp(2.5rem, 6vw, 4rem);
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  letter-spacing: -0.02em;
+}
+
+.vehicles-subtitle {
+  max-width: 700px;
+  margin: 0 auto;
+  font-size: clamp(1.1rem, 2vw, 1.3rem);
+  line-height: 1.7;
+  opacity: 0.78;
+}
+
+.vehicles-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 3rem;
+  margin-bottom: 6rem;
+}
+
+.vehicle-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+}
+
+.vehicle-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.vehicle-image-wrapper {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  background: #111;
+  min-height: 250px;
+}
+
+.vehicle-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+  display: block;
+  background: linear-gradient(135deg, #1a1a1a, #0a0a0a);
+}
+
+.vehicle-card:hover .vehicle-image {
+  transform: scale(1.05);
+}
+
+.vehicle-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.9), transparent);
+  padding: 2rem 1.5rem 1.5rem;
+}
+
+.vehicle-price {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #ffffff;
+  display: block;
+}
+
+.vehicle-content {
+  padding: 2rem;
+}
+
+.vehicle-name {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  letter-spacing: -0.01em;
+  font-family: 'Neue Haas Grotesk Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+.vehicle-description {
+  font-size: 1rem;
+  line-height: 1.6;
+  opacity: 0.75;
+  margin-bottom: 1.25rem;
+  font-family: 'Söhne', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+.vehicle-features {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.vehicle-feature-tag {
+  display: inline-block;
+  padding: 0.4rem 0.9rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  opacity: 0.9;
+}
+
+.vehicle-cta-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 1rem 2rem;
+  background: linear-gradient(135deg, #ffffff, #e5e5e5);
+  color: #000;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  border-radius: 14px;
+  text-decoration: none;
+  transition: all 0.25s cubic-bezier(0.3, 0.7, 0.4, 1);
+  font-family: 'Söhne', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  box-shadow: 
+    inset 0 0 0 1px rgba(0, 0, 0, 0.15),
+    0 6px 14px rgba(0, 0, 0, 0.25);
+}
+
+.vehicle-cta-button:hover {
+  transform: translateY(-3px) scale(1.02);
+  background: linear-gradient(135deg, #ffffff, #f3f3f3);
+  box-shadow:
+    inset 0 0 0 1px rgba(0, 0, 0, 0.2),
+    0 10px 20px rgba(0, 0, 0, 0.35);
+}
+
+.vehicles-cta {
+  text-align: center;
+  padding: 5rem 2rem;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.vehicles-cta h2 {
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 600;
+  margin-bottom: 1rem;
+  letter-spacing: -0.01em;
+  font-family: 'Neue Haas Grotesk Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+.vehicles-cta p {
+  max-width: 600px;
+  margin: 0 auto 2.5rem;
+  font-size: 1.1rem;
+  line-height: 1.7;
+  opacity: 0.8;
+}
+
+/* Mobile responsive for Vehicles page */
+@media (max-width: 768px) {
+  .vehicles-page {
+    padding-top: 5rem;
+  }
+
+  .vehicles-container {
+    padding: 3rem 4vw;
+  }
+
+  .vehicles-header {
+    margin-bottom: 3rem;
+  }
+
+  .vehicles-grid {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    margin-bottom: 4rem;
+  }
+
+  .vehicle-content {
+    padding: 1.5rem;
+  }
+
+  .vehicles-cta {
+    padding: 3rem 1.5rem;
+  }
+}
+
+/* --------------------------------------------------
+   MOBILE RESPONSIVE STYLES
+   -------------------------------------------------- */
+@media (max-width: 768px) {
+  /* Navbar - smaller logo and hamburger menu */
+  .navbar {
+    padding: 1rem 4vw;
+  }
+
+  .nav-logo img {
+    height: 40px;
+  }
+
+  /* Show hamburger menu button */
+  .nav-menu-toggle {
+    display: flex;
+  }
+
+  /* Show backdrop overlay when menu is open */
+  .nav-backdrop {
+    display: block;
+  }
+
+  /* Hide nav links by default, show when menu is open */
+  .nav-links {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 70%;
+    max-width: 280px;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.98);
+    backdrop-filter: blur(20px);
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    padding: 5rem 2rem 2rem;
+    gap: 0;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+    z-index: 999;
+    box-shadow: -4px 0 20px rgba(0, 0, 0, 0.5);
+  }
+
+  .nav-links--open {
+    transform: translateX(0);
+  }
+
+  .nav-link {
+    width: 100%;
+    font-size: 1rem;
+    letter-spacing: 0.1em;
+    padding: 1rem 0;
+    text-align: left;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .nav-link::after {
+    display: none;
+  }
+
+  .nav-link:last-child {
+    border-bottom: none;
+  }
+
+  /* Hero section - reduced padding and better spacing */
+  .hero {
+    padding: 8rem 4vw 4rem;
+    min-height: 100vh;
+  }
+
+  .hero-kicker {
+    font-size: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .hero-title {
+    font-size: clamp(2rem, 8vw, 3rem);
+    margin-bottom: 1rem;
+  }
+
+  .hero-subtitle {
+    font-size: clamp(1rem, 4vw, 1.2rem);
+  }
+
+  /* Scroll sections - stack vertically on mobile */
+  .scroll-section {
+    padding: 4rem 4vw;
+    min-height: auto;
+  }
+
+  .scroll-section-inner {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+  }
+
+  .section-text {
+    order: 1;
+  }
+
+  .section-image {
+    order: 2;
+  }
+
+  .section-image-inner {
+    max-width: 100%;
+    aspect-ratio: 16 / 10;
+    border-radius: 16px;
+  }
+
+  .section-label {
+    font-size: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .section-heading {
+    font-size: clamp(1.75rem, 6vw, 2.25rem);
+    margin-bottom: 1rem;
+  }
+
+  .section-body {
+    font-size: 0.95rem;
+    line-height: 1.7;
+    max-width: 100%;
+  }
+
+  /* Button - full width and touch-friendly on mobile */
+  .primary-button {
+    width: 100%;
+    padding: 1rem 2rem;
+    font-size: 0.95rem;
+  }
+
+  /* About section */
+  .about {
+    padding: 3rem 4vw;
+    min-height: auto;
+  }
+
+  .about h2 {
+    font-size: clamp(1.75rem, 6vw, 2rem);
+  }
+
+  .about-content {
+    font-size: 1rem;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  .about-video-placeholder {
+    width: 100%;
+    max-width: 250px;
+    margin: 0 auto;
+  }
+
+  /* Financing section */
+  .financing {
+    padding: 3rem 4vw;
+    min-height: auto;
+  }
+
+  .financing-content {
+    padding: 3rem 1.5rem;
+    border-radius: 16px;
+  }
+
+  .financing h2 {
+    font-size: clamp(1.75rem, 6vw, 2rem);
+  }
+
+  .financing p {
+    font-size: 1rem;
+  }
+
+  /* Footer */
+  .footer {
+    padding: 2rem 4vw;
+  }
+
+  .footer-content {
+    flex-direction: column;
+    text-align: center;
+    gap: 1.5rem;
+  }
+
+  .footer-developer {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+}
+
+/* Extra small devices (phones in portrait) */
+@media (max-width: 480px) {
+  .navbar {
+    padding: 0.75rem 4vw;
+  }
+
+  .nav-logo img {
+    height: 35px;
+  }
+
+  .nav-links {
+    gap: 0.75rem;
+  }
+
+  .nav-link {
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+  }
+
+  .hero {
+    padding: 7rem 4vw 3rem;
+  }
+
+  .scroll-section {
+    padding: 3rem 4vw;
+  }
+
+  .scroll-section-inner {
+    gap: 2rem;
+  }
+
+  .section-image-inner {
+    border-radius: 12px;
+  }
+}
+
+/* Tablet adjustments */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .navbar {
+    padding: 1.25rem 6vw;
+  }
+
+  .hero {
+    padding: 5rem 6vw;
+  }
+
+  .scroll-section {
+    padding: 5rem 6vw;
+  }
+
+  .scroll-section-inner {
+    gap: 3rem;
+  }
+}
+
+/* --------------------------------------------------
+   SPACING FIXES – GLOBAL IMPROVEMENTS
+   -------------------------------------------------- */
+
+/* Reduce the very large vertical gaps between scroll sections */
+.scroll-section {
+  padding: 6rem 8vw;            /* was too tall on desktop */
+  min-height: 90vh;             /* keeps premium feel without excess height */
+  display: flex;
+  align-items: center;          /* centers vertically like Shed */
+}
+
+/* More balanced max-width for content */
+.scroll-section-inner {
+  max-width: 1150px;            /* slightly narrower for tighter reading */
+  gap: 3rem;                    /* reduce large whitespace */
+}
+
+/* Hero spacing cleanup */
+.hero {
+  padding: 7rem 8vw 5rem;       /* previously huge top and bottom paddings */
+}
+
+/* Vehicles page spacing */
+.vehicles-container {
+  padding: 3rem 6vw;
+}
+
+.vehicles-status {
+  color: #e5e7eb;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 2rem;
+  text-align: center;
+  width: 100%;
+  grid-column: 1 / -1;
+  font-size: 1.1rem;
+}
+
+.vehicles-status--error {
+  color: #fecdd3;
+  border-color: rgba(248, 113, 113, 0.35);
+  background: rgba(248, 113, 113, 0.08);
+}
+
+/* CTA inside vehicles */
+.vehicles-cta {
+  padding: 4rem 2rem;
+}
+
+/* Fix final CTA section's layout so text sits center-screen nicely */
+.scroll-section--final {
+  padding: 7rem 8vw;
+  min-height: 80vh;
+  display: flex;
+  align-items: center;
+}
+
+/* --------------------------------------------------
+   MOBILE RESPONSIVE SPACING CLEANUP
+   -------------------------------------------------- */
+@media (max-width: 768px) {
+  .scroll-section {
+    padding: 4rem 5vw;
+    min-height: auto;
+  }
+
+  .scroll-section-inner {
+    gap: 2rem;
+  }
+
+  .hero {
+    padding: 6rem 5vw 3rem;
+  }
+
+  .section-heading {
+    margin-bottom: 0.75rem;
+  }
+
+  .section-body {
+    line-height: 1.65;
+  }
+
+  .vehicles-container {
+    padding: 2.5rem 5vw;
+  }
+
+  .vehicles-cta {
+    padding: 3rem 1.5rem;
+  }
+
+  .scroll-section--final {
+    padding: 5rem 5vw;
+  }
+}
+
+/* --------------------------------------------------
+   EXTRA SMALL DEVICES TWEAKS (≤480px)
+   -------------------------------------------------- */
+@media (max-width: 480px) {
+  .scroll-section {
+    padding: 3.5rem 5vw;
+  }
+
+  .scroll-section-inner {
+    gap: 1.75rem;
+  }
+
+  .hero {
+    padding: 6rem 5vw 2.5rem;
+  }
+}

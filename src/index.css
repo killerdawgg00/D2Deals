@@ -1,0 +1,73 @@
+:root {
+  --color-bg: #ffffff;             /* background color — white or light */
+  --color-text: #a79d9d;           /* main text (black-ish) */
+  --color-accent: #ff1f1f;         /* logo red / accent red */
+  --color-header-bg: #444040;      /* header background — black */
+  --color-header-text: #ffffff;    /* header text if needed */
+  --font-base: 'Helvetica Neue', Arial, sans-serif;
+
+  --spacing-s: 0.5rem;
+  --spacing-m: 1rem;
+  --spacing-l: 2rem;
+
+  --max-width: 1200px;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+}
+
+body {
+  font-family: var(--font-base);
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  line-height: 1.5;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+a {
+  text-decoration: none;
+  color: var(--color-accent);
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Utility container for horizontal centering + max width */
+.container {
+  width: 90%;
+  max-width: var(--max-width);
+  margin: 0 auto;
+}
+
+/* Basic typography */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-base);
+  color: var(--color-text);
+  margin-bottom: var(--spacing-m);
+}
+
+p {
+  margin-bottom: var(--spacing-m);
+}
+
+/* Links */
+a {
+  color: var(--color-accent);
+  transition: color 0.2s ease-in-out;
+}
+
+a:hover {
+  color: darkred;
+}
