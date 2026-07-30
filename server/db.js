@@ -17,6 +17,12 @@ const memory = {
 
 export const usingDemoDatabase = !pool;
 
+export async function checkDatabaseConnection() {
+  if (!pool) return { connected: false, mode: 'demo-memory' };
+  const { rows } = await pool.query('SELECT current_database() AS database, NOW() AS checked_at');
+  return { connected: true, mode: 'postgres', database: rows[0].database, checked_at: rows[0].checked_at };
+}
+
 export async function listVehicles({ status, search }) {
   const statuses = status ? status.split(',').map((value) => value.trim()).filter(Boolean) : [];
   if (!pool) {

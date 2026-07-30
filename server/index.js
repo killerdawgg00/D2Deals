@@ -14,12 +14,18 @@ if (fs.existsSync(envPath)) {
   }
 }
 // Load database code after .env so its connection pool sees DATABASE_URL.
-const { archiveVehicle, createBid, createOrder, createVehicle, getDashboard, listVehicles, updateOrderStatus, updateVehicle, usingDemoDatabase } = await import('./db.js');
+if (process.env.NODE_ENV === 'production') {
+  const missing = ['DATABASE_URL', 'ADMIN_API_KEY'].filter((key) => !process.env[key]);
+  if (missing.length) throw new Error(`Missing required production environment variables: ${missing.join(', ')}`);
+}
+
+const { archiveVehicle, checkDatabaseConnection, createBid, createOrder, createVehicle, getDashboard, listVehicles, pool, updateOrderStatus, updateVehicle, usingDemoDatabase } = await import('./db.js');
 const app = express();
 const port = Number(process.env.PORT || 4000);
 const allowedOrderStatuses = ['pending', 'confirmed', 'paid', 'delivered', 'cancelled'];
 
-app.use(cors({ origin: process.env.FRONTEND_URL?.split(',') || true }));
+const allowedOrigins = process.env.FRONTEND_URL?.split(',').map((origin) => origin.trim()).filter(Boolean);
+app.use(cors({ origin: allowedOrigins?.length ? allowedOrigins : true }));
 app.use(express.json({ limit: '1mb' }));
 
 const adminOnly = (req, res, next) => {
@@ -35,7 +41,10 @@ const requireFields = (fields) => (req, res, next) => {
 };
 const handler = (fn) => async (req, res, next) => { try { await fn(req, res); } catch (error) { next(error); } };
 
-app.get('/api/health', (req, res) => res.json({ ok: true, database: usingDemoDatabase ? 'demo-memory' : 'postgres' }));
+app.get('/api/health', handler(async (req, res) => {
+  const database = await checkDatabaseConnection();
+  res.status(database.connected || process.env.NODE_ENV !== 'production' ? 200 : 503).json({ ok: database.connected, database });
+}));
 app.get('/api/vehicles', handler(async (req, res) => res.json({ vehicles: await listVehicles({ status: req.query.status, search: req.query.search }) })));
 app.post('/api/orders', requireFields(['vehicle_id','customer_name','customer_email','customer_phone']), handler(async (req, res) => {
   const order = await createOrder(req.body);
@@ -78,4 +87,14 @@ app.use((error, req, res, next) => { // eslint-disable-line no-unused-vars
   console.error(error);
   res.status(error.status || 500).json({ error: process.env.NODE_ENV === 'production' ? 'Server error.' : error.message });
 });
-app.listen(port, () => console.log(`D2Deals API listening on http://localhost:${port} (${usingDemoDatabase ? 'demo memory' : 'Postgres'})`));
+const server = app.listen(port, '0.0.0.0', () => console.log(`D2Deals API listening on port ${port} (${usingDemoDatabase ? 'demo memory' : 'Postgres'})`));
+
+const shutdown = async (signal) => {
+  console.log(`${signal} received; closing server.`);
+  server.close(async () => {
+    if (pool) await pool.end();
+    process.exit(0);
+  });
+};
+process.on('SIGTERM', () => shutdown('SIGTERM'));
+process.on('SIGINT', () => shutdown('SIGINT'));
