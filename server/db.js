@@ -32,15 +32,16 @@ export async function listVehicles({ status, search }) {
 }
 
 export async function createVehicle(data) {
+  const currency = String(data.currency || 'GHS').trim().toUpperCase();
   if (!pool) {
-    const vehicle = { id: crypto.randomUUID(), ...data, featured: Boolean(data.featured), created_at: new Date().toISOString() };
+    const vehicle = { id: crypto.randomUUID(), ...data, currency, featured: Boolean(data.featured), created_at: new Date().toISOString() };
     memory.vehicles.unshift(vehicle);
     return vehicle;
   }
   const { rows } = await pool.query(
     `INSERT INTO vehicles (name,make,model,year,price_amount,currency,image,mileage,transmission,description,status,featured)
      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) RETURNING *`,
-    [data.name, data.make, data.model, data.year, data.price_amount, data.currency, data.image || '', data.mileage || 0, data.transmission || 'Automatic', data.description || '', data.status || 'available', Boolean(data.featured)],
+    [data.name, data.make, data.model, data.year, data.price_amount, currency, data.image || '', data.mileage || 0, data.transmission || 'Automatic', data.description || '', data.status || 'available', Boolean(data.featured)],
   );
   return rows[0];
 }

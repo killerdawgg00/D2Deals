@@ -51,7 +51,11 @@ app.post('/api/bids', requireFields(['vehicle_id','customer_name','customer_emai
 }));
 
 app.get('/api/admin/dashboard', adminOnly, handler(async (req, res) => res.json(await getDashboard())));
-app.post('/api/admin/vehicles', adminOnly, requireFields(['name','make','model','year','price_amount','currency']), handler(async (req, res) => res.status(201).json({ vehicle: await createVehicle(req.body) })));
+app.post('/api/admin/vehicles', adminOnly, requireFields(['name','make','model','year','price_amount','currency']), handler(async (req, res) => {
+  const currency = String(req.body.currency).trim().toUpperCase();
+  if (!['GHS', 'USD'].includes(currency)) return res.status(400).json({ error: 'Currency must be GHS or USD.' });
+  res.status(201).json({ vehicle: await createVehicle({ ...req.body, currency }) });
+}));
 app.patch('/api/admin/vehicles/:id', adminOnly, handler(async (req, res) => {
   const vehicle = await updateVehicle(req.params.id, req.body);
   res.status(vehicle ? 200 : 404).json(vehicle ? { vehicle } : { error: 'Vehicle not found.' });
