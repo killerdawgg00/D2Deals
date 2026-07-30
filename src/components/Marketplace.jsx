@@ -21,7 +21,7 @@ export default function Marketplace() {
   const [notice, setNotice] = useState('');
 
   useEffect(() => {
-    api.vehicles('?status=available')
+    api.vehicles('?status=available,auction,rental')
       .then(({ vehicles: rows }) => setVehicles(rows))
       .catch(() => setVehicles(fallbackVehicles.map((car) => ({
         ...car,
@@ -111,7 +111,7 @@ export default function Marketplace() {
             <article className="car-card reveal" key={car.id}>
               <div className="car-image">
                 <img src={car.image || '/porsche-black.jpg'} alt={car.name} loading="lazy" />
-                <span className="car-status">{car.status === 'auction' ? 'Live auction' : 'Available now'}</span>
+                <span className="car-status">{car.status === 'auction' ? 'Live auction' : car.status === 'rental' ? 'Available to rent' : 'Available now'}</span>
                 {car.featured && <span className="featured-badge">Featured</span>}
               </div>
               <div className="car-info">

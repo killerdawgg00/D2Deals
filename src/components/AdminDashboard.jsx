@@ -9,6 +9,7 @@ export default function AdminDashboard() {
   const [draftToken, setDraftToken] = useState('');
   const [data, setData] = useState(null);
   const [car, setCar] = useState(initialCar);
+  const [editingId, setEditingId] = useState(null);
   const [active, setActive] = useState('overview');
   const [message, setMessage] = useState('');
 
@@ -32,8 +33,45 @@ export default function AdminDashboard() {
   const addVehicle = async (event) => {
     event.preventDefault();
     try {
-      await api.createVehicle({ ...car, price_amount: Number(car.price_amount), year: Number(car.year), mileage: Number(car.mileage || 0) }, token);
-      setCar(initialCar); setMessage('Vehicle published successfully.'); await load();
+      const payload = { ...car, price_amount: Number(car.price_amount), year: Number(car.year), mileage: Number(car.mileage || 0) };
+      if (editingId) {
+        await api.updateVehicle(editingId, payload, token);
+        setMessage('Vehicle changes saved successfully.');
+      } else {
+        await api.createVehicle(payload, token);
+        setMessage('Vehicle published successfully.');
+      }
+      setCar(initialCar); setEditingId(null); await load();
+    } catch (error) { setMessage(error.message); }
+  };
+  const editVehicle = (vehicle) => {
+    setEditingId(vehicle.id);
+    setCar({
+      name: vehicle.name || '',
+      make: vehicle.make || '',
+      model: vehicle.model || '',
+      year: vehicle.year || new Date().getFullYear(),
+      price_amount: vehicle.price_amount || '',
+      currency: vehicle.currency || 'GHS',
+      image: vehicle.image || '',
+      mileage: vehicle.mileage || '',
+      transmission: vehicle.transmission || 'Automatic',
+      status: vehicle.status || 'available',
+      description: vehicle.description || '',
+    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+  const cancelEdit = () => {
+    setEditingId(null);
+    setCar(initialCar);
+  };
+  const deleteVehicle = async (vehicle) => {
+    if (!window.confirm(`Remove ${vehicle.name} from the public inventory? Past order records will be preserved.`)) return;
+    try {
+      await api.deleteVehicle(vehicle.id, token);
+      if (editingId === vehicle.id) cancelEdit();
+      setMessage(`${vehicle.name} was removed from the public inventory.`);
+      await load();
     } catch (error) { setMessage(error.message); }
   };
   const setOrderStatus = async (id, status) => {
@@ -62,11 +100,11 @@ export default function AdminDashboard() {
           <article><span>Sales value</span><strong>GH₵{Number(data?.stats.sales_value || 0).toLocaleString()}</strong><small>Confirmed orders</small></article>
         </div><OrderTable orders={data?.orders?.slice(0, 6)} onStatus={setOrderStatus} /></>}
         {active === 'inventory' && <div className="admin-two-col">
-          <form className="vehicle-form panel" onSubmit={addVehicle}><h2>Post a vehicle</h2><p>Complete the core details. You can edit stock status later.</p>
-            <div className="form-grid">{Object.keys(initialCar).map((key) => key === 'description' ? <label className="span-2" key={key}>Description<textarea value={car[key]} onChange={(e) => setCar({ ...car, [key]: e.target.value })} /></label> : key === 'status' ? <label key={key}>Status<select value={car[key]} onChange={(e) => setCar({ ...car, [key]: e.target.value })}><option value="available">Available</option><option value="auction">Auction</option><option value="reserved">Reserved</option></select></label> : key === 'currency' ? <label key={key}>Currency<select value={car[key]} onChange={(e) => setCar({ ...car, currency: e.target.value })}><option value="GHS">GHS — Ghana cedi</option><option value="USD">USD — US dollar</option></select></label> : <label key={key}>{key.replace('_', ' ')}<input required={!['image', 'mileage'].includes(key)} type={['year', 'price_amount', 'mileage'].includes(key) ? 'number' : 'text'} value={car[key]} onChange={(e) => setCar({ ...car, [key]: e.target.value })} placeholder={key === 'image' ? '/your-car.jpg or https://...' : ''} /></label>)}</div>
-            <button className="button button-primary">Publish vehicle</button><small className="helper">Upload images to Supabase Storage later and paste the public URL into Image.</small>
+          <form className="vehicle-form panel" onSubmit={addVehicle}><h2>{editingId ? 'Edit vehicle' : 'Post a vehicle'}</h2><p>{editingId ? 'Update the details below and save your changes.' : 'Complete the core details. You can edit stock status later.'}</p>
+            <div className="form-grid">{Object.keys(initialCar).map((key) => key === 'description' ? <label className="span-2" key={key}>Description<textarea value={car[key]} onChange={(e) => setCar({ ...car, [key]: e.target.value })} /></label> : key === 'status' ? <label key={key}>Status<select value={car[key]} onChange={(e) => setCar({ ...car, [key]: e.target.value })}><option value="available">Available</option><option value="auction">Auction</option><option value="rental">Rental</option><option value="reserved">Reserved</option></select></label> : key === 'currency' ? <label key={key}>Currency<select value={car[key]} onChange={(e) => setCar({ ...car, currency: e.target.value })}><option value="GHS">GHS — Ghana cedi</option><option value="USD">USD — US dollar</option></select></label> : key === 'transmission' ? <label key={key}>Transmission<select value={car[key]} onChange={(e) => setCar({ ...car, transmission: e.target.value })}><option value="Automatic">Automatic</option><option value="Manual">Manual</option><option value="CVT">CVT</option></select></label> : <label key={key}>{key.replace('_', ' ')}<input required={!['image', 'mileage'].includes(key)} type={['year', 'price_amount', 'mileage'].includes(key) ? 'number' : 'text'} value={car[key]} onChange={(e) => setCar({ ...car, [key]: e.target.value })} placeholder={key === 'image' ? '/your-car.jpg or https://...' : ''} /></label>)}</div>
+            <div className="form-actions"><button className="button button-primary">{editingId ? 'Save changes' : 'Publish vehicle'}</button>{editingId && <button className="button button-outline" type="button" onClick={cancelEdit}>Cancel editing</button>}</div><small className="helper">Upload images to Supabase Storage later and paste the public URL into Image.</small>
           </form>
-          <div className="panel"><h2>Current inventory</h2><div className="inventory-list">{data?.vehicles?.map((v) => <div key={v.id}><img src={v.image || '/porsche-black.jpg'} alt="" /><span><strong>{v.name}</strong><small>{v.status} · {v.currency} {Number(v.price_amount).toLocaleString()}</small></span></div>)}</div></div>
+          <div className="panel"><h2>Current inventory</h2><p>Edit details or remove a vehicle from the storefront.</p><div className="inventory-list">{data?.vehicles?.filter((v) => v.status !== 'hidden').map((v) => <div key={v.id}><img src={v.image || '/porsche-black.jpg'} alt="" /><span><strong>{v.name}</strong><small>{v.status} · {v.currency} {Number(v.price_amount).toLocaleString()}</small></span><div className="inventory-actions"><button type="button" onClick={() => editVehicle(v)}>Edit</button><button className="danger" type="button" onClick={() => deleteVehicle(v)}>Delete</button></div></div>)}</div></div>
         </div>}
         {active === 'orders' && <OrderTable orders={data?.orders} onStatus={setOrderStatus} />}
         {active === 'bids' && <div className="panel"><h2>Bid activity</h2><div className="table-wrap"><table><thead><tr><th>Bidder</th><th>Vehicle</th><th>Bid</th><th>Status</th></tr></thead><tbody>{data?.bids?.map((bid) => <tr key={bid.id}><td>{bid.customer_name}<small>{bid.customer_phone}</small></td><td>{bid.vehicle_name}</td><td>{bid.currency} {Number(bid.amount).toLocaleString()}</td><td><span className="status-pill">{bid.status}</span></td></tr>)}</tbody></table></div></div>}

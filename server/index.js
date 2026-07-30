@@ -14,7 +14,7 @@ if (fs.existsSync(envPath)) {
   }
 }
 // Load database code after .env so its connection pool sees DATABASE_URL.
-const { createBid, createOrder, createVehicle, getDashboard, listVehicles, updateOrderStatus, updateVehicle, usingDemoDatabase } = await import('./db.js');
+const { archiveVehicle, createBid, createOrder, createVehicle, getDashboard, listVehicles, updateOrderStatus, updateVehicle, usingDemoDatabase } = await import('./db.js');
 const app = express();
 const port = Number(process.env.PORT || 4000);
 const allowedOrderStatuses = ['pending', 'confirmed', 'paid', 'delivered', 'cancelled'];
@@ -59,6 +59,10 @@ app.post('/api/admin/vehicles', adminOnly, requireFields(['name','make','model',
 app.patch('/api/admin/vehicles/:id', adminOnly, handler(async (req, res) => {
   const vehicle = await updateVehicle(req.params.id, req.body);
   res.status(vehicle ? 200 : 404).json(vehicle ? { vehicle } : { error: 'Vehicle not found.' });
+}));
+app.delete('/api/admin/vehicles/:id', adminOnly, handler(async (req, res) => {
+  const vehicle = await archiveVehicle(req.params.id);
+  res.status(vehicle ? 200 : 404).json(vehicle ? { vehicle, archived: true } : { error: 'Vehicle not found.' });
 }));
 app.patch('/api/admin/orders/:id', adminOnly, requireFields(['status']), handler(async (req, res) => {
   if (!allowedOrderStatuses.includes(req.body.status)) return res.status(400).json({ error: 'Invalid order status.' });

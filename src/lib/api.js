@@ -18,6 +18,9 @@ export const api = {
   updateVehicle: (id, data, token) => request(`/admin/vehicles/${id}`, {
     method: 'PATCH', body: JSON.stringify(data), headers: { Authorization: `Bearer ${token}` },
   }),
+  deleteVehicle: (id, token) => request(`/admin/vehicles/${id}`, {
+    method: 'DELETE', headers: { Authorization: `Bearer ${token}` },
+  }),
   createBid: (data) => request('/bids', { method: 'POST', body: JSON.stringify(data) }),
   createOrder: (data) => request('/orders', { method: 'POST', body: JSON.stringify(data) }),
   dashboard: (token) => request('/admin/dashboard', { headers: { Authorization: `Bearer ${token}` } }),

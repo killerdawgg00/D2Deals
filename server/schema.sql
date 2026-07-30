@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS vehicles (
   transmission TEXT NOT NULL DEFAULT 'Automatic',
   description TEXT DEFAULT '',
   features JSONB NOT NULL DEFAULT '[]'::jsonb,
-  status TEXT NOT NULL DEFAULT 'available' CHECK (status IN ('available', 'auction', 'reserved', 'sold', 'hidden')),
+  status TEXT NOT NULL DEFAULT 'available' CHECK (status IN ('available', 'auction', 'rental', 'reserved', 'sold', 'hidden')),
   featured BOOLEAN NOT NULL DEFAULT FALSE,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
@@ -55,4 +55,3 @@ CREATE INDEX IF NOT EXISTS vehicles_status_idx ON vehicles(status);
 CREATE INDEX IF NOT EXISTS vehicles_make_idx ON vehicles(make);
 CREATE INDEX IF NOT EXISTS orders_status_idx ON orders(status);
 CREATE INDEX IF NOT EXISTS bids_vehicle_idx ON bids(vehicle_id);
-

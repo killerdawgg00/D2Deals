@@ -18,14 +18,15 @@ const memory = {
 export const usingDemoDatabase = !pool;
 
 export async function listVehicles({ status, search }) {
+  const statuses = status ? status.split(',').map((value) => value.trim()).filter(Boolean) : [];
   if (!pool) {
     return memory.vehicles.filter((vehicle) =>
-      (!status || vehicle.status === status) &&
+      (!statuses.length || statuses.includes(vehicle.status)) &&
       (!search || `${vehicle.name} ${vehicle.make} ${vehicle.model}`.toLowerCase().includes(search.toLowerCase())));
   }
   const values = [];
   const conditions = [];
-  if (status) { values.push(status); conditions.push(`status = $${values.length}`); }
+  if (statuses.length) { values.push(statuses); conditions.push(`status = ANY($${values.length}::text[])`); }
   if (search) { values.push(`%${search}%`); conditions.push(`(name ILIKE $${values.length} OR make ILIKE $${values.length} OR model ILIKE $${values.length})`); }
   const { rows } = await pool.query(`SELECT * FROM vehicles ${conditions.length ? `WHERE ${conditions.join(' AND ')}` : ''} ORDER BY featured DESC, created_at DESC`, values);
   return rows;
@@ -60,6 +61,22 @@ export async function updateVehicle(id, data) {
   values.push(id);
   const sets = entries.map(([key], index) => `${key} = $${index + 1}`);
   const { rows } = await pool.query(`UPDATE vehicles SET ${sets.join(', ')}, updated_at=NOW() WHERE id=$${values.length} RETURNING *`, values);
+  return rows[0] || null;
+}
+
+// Inventory deletion is intentionally a soft delete. Keeping the row preserves
+// historical orders and bids while removing the vehicle from the storefront.
+export async function archiveVehicle(id) {
+  if (!pool) {
+    const vehicle = memory.vehicles.find((item) => item.id === id);
+    if (!vehicle) return null;
+    vehicle.status = 'hidden';
+    return vehicle;
+  }
+  const { rows } = await pool.query(
+    `UPDATE vehicles SET status='hidden', updated_at=NOW() WHERE id=$1 RETURNING *`,
+    [id],
+  );
   return rows[0] || null;
 }
 
