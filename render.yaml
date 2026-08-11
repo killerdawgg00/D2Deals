@@ -2,7 +2,9 @@ services:
   - type: web
     name: d2deals-driveway
     runtime: node
-    buildCommand: npm ci && npm run build
+    # NODE_ENV is production on Render, so explicitly include Vite and the
+    # other build-time devDependencies before creating the frontend bundle.
+    buildCommand: npm ci --include=dev && npm run build
     startCommand: npm start
     healthCheckPath: /api/health
     autoDeploy: true
